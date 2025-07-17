@@ -1,1 +1,1 @@
-# CS-onprem-sql-data-warehouse
+# CS-snowflake-data-warehouse
