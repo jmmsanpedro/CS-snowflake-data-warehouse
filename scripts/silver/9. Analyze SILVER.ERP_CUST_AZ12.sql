@@ -1,0 +1,25 @@
+USE ROLE SYSADMIN;
+USE DATABASE SALES;
+
+--
+SELECT 
+    *
+FROM
+    BRONZE.ERP_CUST_AZ12;
+
+-- 1. Check if CID is unique
+SELECT 
+    CID,
+    COUNT(1)
+FROM
+    BRONZE.ERP_CUST_AZ12
+GROUP BY
+    CID
+HAVING 
+    COUNT(1)>1;
+
+-- 2. Check Gender values
+SELECT
+    DISTINCT GEN
+FROM
+    BRONZE.ERP_CUST_AZ12;
