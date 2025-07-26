@@ -1,0 +1,37 @@
+USE ROLE sysadmin;
+USE DATABASE sales;
+
+SELECT
+    *
+FROM
+    BRONZE.CRM_PRD_INFO
+LIMIT
+    100;
+-- 1. Check if keys are unique
+SELECT
+    PRD_ID,
+    PRD_KEY,
+    COUNT(1)
+FROM
+    BRONZE.CRM_PRD_INFO
+GROUP BY
+    PRD_ID,
+    PRD_KEY
+HAVING
+    COUNT(1) > 1
+    OR PRD_ID IS NULL
+    OR PRD_KEY IS NULL;
+-- 2. Check if there are no spaces
+SELECT
+    PRD_NM
+FROM
+    BRONZE.CRM_PRD_INFO
+WHERE
+    PRD_NM != TRIM(PRD_NM);
+-- 3. Check Price
+SELECT
+    DISTINCT PRD_PRICE
+FROM
+    BRONZE.CRM_PRD_INFO
+ORDER BY
+    PRD_PRICE;
