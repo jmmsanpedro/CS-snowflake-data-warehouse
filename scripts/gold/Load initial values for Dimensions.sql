@@ -1,0 +1,61 @@
+USE ROLE SYSADMIN;
+USE DATABASE SALES;
+-- Insert 0 values to the dimensions to catch all invalid keys
+--DIM_STORE
+INSERT INTO
+    GOLD.DIM_STORE (
+        STORE_ID,
+        STORE_NAME,
+        STORE_LOCATION
+    )
+VALUES
+    (0, 'N/A', 'N/A');
+--DIM_CUSTOMER
+INSERT INTO
+    GOLD.DIM_CUSTOMER (
+        CUSTOMER_ID,
+        CUSTOMER_NUMBER,
+        STORE_KEY,
+        DWH_STATUS,
+        DWH_START_DATE,
+        DWH_END_DATE
+    )
+VALUES
+    (
+        0,
+        0,
+        0,
+        'Current',
+        '1900-01-01',
+        '9999-12-31'
+    );
+SELECT
+    *
+FROM
+    GOLD.DIM_CUSTOMER;
+    
+-- DIM_DATE
+INSERT INTO
+    GOLD.DIM_DATE
+    WITH DATE_RANGE AS (
+        SELECT
+            DATEADD(DAY, SEQ4(), '2020-01-01') AS DATE
+        FROM
+            TABLE(GENERATOR(ROWCOUNT => 2192)) -- 6 YEARS OF DATA
+    )
+SELECT
+    ROW_NUMBER() OVER(ORDER BY DATE ASC),
+    DATE,
+    YEAR(DATE) AS YEAR,
+    MONTH(DATE) AS MONTH,
+    DAY(DATE) AS DAY,
+    TRIM(TO_CHAR(DATE, 'MMMM')) AS MONTH_NAME,
+    TO_CHAR(DATE, 'YYYYMM') AS PERIOD
+FROM
+    DATE_RANGE
+WHERE
+    DATE <= '2025-12-31'
+ORDER BY
+    DATE;
+
+SELECT * FROM GOLD.DIM_DATE;
