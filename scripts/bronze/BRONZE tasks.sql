@@ -1,0 +1,68 @@
+USE ROLE TASKADMIN4;
+USE DATABASE SALES;
+
+CREATE OR REPLACE PROCEDURE SALES.BRONZE.SP_LOAD_BRONZE()
+RETURNS STRING
+LANGUAGE SQL
+AS
+
+--Declare the variables
+DECLARE 
+    v_MONTH VARCHAR;
+    v_YEAR VARCHAR;
+BEGIN
+
+--Assign the variables based on ETL_CONFIG_TABLE
+    SELECT 
+        TO_CHAR(DATE, 'MM') as MONTH, 
+        TO_CHAR(DATE, 'YYYY') as YEAR 
+    INTO 
+        v_MONTH,
+        v_YEAR
+    FROM 
+        METADATADB.PUBLIC.ETL_CONFIG_TABLE 
+    WHERE 
+        STATUS = 1;
+
+    -- TRUNCATE TABLE SALES.BRONZE.CRM_CUST_INFO;
+    -- COPY INTO SALES.BRONZE.CRM_CUST_INFO
+    --     FROM @my_azure_stage/crm/v_YEAR/v_MONTH/v_DAY/cust_info.csv;
+
+    -- TRUNCATE TABLE SALES.BRONZE.CRM_PRD_INFO;
+    -- COPY INTO SALES.BRONZE.CRM_PRD_INFO
+    --     FROM @my_azure_stage/crm/v_YEAR/v_MONTH/v_DAY/prd_info.csv;
+
+    --TRUNCATE TABLE SALES.BRONZE.CRM_SALES_DETAILS;
+    COPY INTO SALES.BRONZE.CRM_SALES_DETAILS
+        FROM @"SALES"."BRONZE"."MY_AZURE_STAGE"/pos/v_YEAR/v_MONTH/sales_details_feb2023.csv;
+--'@"SALES"."BRONZE"."MY_AZURE_STAGE"/pos/2023/02/sales_details_feb2023.csv'
+    -- --ERP
+    -- TRUNCATE TABLE SALES.BRONZE.ERP_CUST_AZ12;
+    -- COPY INTO SALES.BRONZE.ERP_CUST_AZ12
+    --     FROM @my_azure_stage/erp/v_YEAR/v_MONTH/v_DAY/cust_az12.csv;
+
+    -- TRUNCATE TABLE SALES.BRONZE.ERP_PX_CAT_G1V2;
+    -- COPY INTO SALES.BRONZE.ERP_PX_CAT_G1V2
+    --     FROM @my_azure_stage/erp/v_YEAR/v_MONTH/v_DAY/px_cat_g1v2.csv;
+
+    -- TRUNCATE TABLE SALES.BRONZE.ERP_STORES;
+    -- COPY INTO SALES.BRONZE.ERP_STORES
+    --     FROM @my_azure_stage/crm/v_YEAR/v_MONTH/v_DAY/stores.csv;
+    
+    RETURN 'Successfully loaded BRONZE tables' || v_MONTH || v_YEAR;
+
+END;
+
+CALL SALES.BRONZE.SP_LOAD_BRONZE();
+SELECT COUNT(1) FROM SALES.BRONZE.CRM_SALES_DETAILS;
+    SELECT 
+        TO_CHAR(DATE, 'MM') as MONTH, 
+        YEAR 
+    FROM 
+        METADATADB.PUBLIC.ETL_CONFIG_TABLE 
+    WHERE 
+        STATUS = 1;
+
+        COPY INTO SALES.BRONZE.CRM_SALES_DETAILS
+        FROM @"SALES"."BRONZE"."MY_AZURE_STAGE"/pos/v_YEAR/v_MONTH/sales_details_feb2023.csv;
+
