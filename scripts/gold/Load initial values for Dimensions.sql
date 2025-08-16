@@ -33,7 +33,26 @@ SELECT
     *
 FROM
     GOLD.DIM_CUSTOMER;
-    
+
+--DIM_PRODUCT
+INSERT INTO
+    SALES.GOLD.DIM_PRODUCT(
+        PRODUCT_ID,
+        PRODUCT_NUMBER,
+        PRODUCT_NAME,
+        PRODUCT_CATEGORY,
+        PRODUCT_SUBCATEGORY
+    )
+VALUES
+    (
+        0,
+        '0',
+        'N/A',
+        'N/A',
+        'N/A'
+    )
+    ;
+
 -- DIM_DATE
 INSERT INTO
     GOLD.DIM_DATE
