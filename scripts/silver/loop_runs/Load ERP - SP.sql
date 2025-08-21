@@ -1,0 +1,103 @@
+USE ROLE ACCOUNTADMIN;
+USE DATABASE SALES;
+
+
+-- Load SILVER.STORES 1 of 3 silver tables
+CREATE OR REPLACE PROCEDURE SILVER.SP_LOAD_ERP_STORES_PARAM(V_YEAR INT, V_MONTH INT)
+RETURNS STRING
+LANGUAGE SQL
+AS
+BEGIN
+    LET SQL_CMD STRING := 
+    '
+    INSERT INTO 
+      SALES.SILVER.ERP_STORES
+    SELECT
+        *
+        EXCLUDE (VALUE, SRC_YEAR, SRC_MONTH, SRC_FILE, SRC_LAST_MODIFIED, SRC_SCAN),
+        GETDATE()
+    FROM
+        SALES.BRONZE.ERP_STORES_EXT
+    WHERE
+        SRC_YEAR = ' || V_YEAR || ' AND
+        SRC_MONTH = ' || V_MONTH;
+        
+    EXECUTE IMMEDIATE SQL_CMD;
+
+ RETURN 'Successfully loaded SALES.SILVER.ERP_STORES';
+END;
+
+-- 
+
+--------
+-- Load SILVER.ERP_PX_CAT_G1V2 2 of 3 silver tables
+CREATE OR REPLACE PROCEDURE SILVER.SP_LOAD_ERP_PX_CAT_G1V2_PARAM(V_YEAR INT, V_MONTH INT)
+RETURNS STRING
+LANGUAGE SQL
+AS
+BEGIN
+
+    LET SQL_CMD STRING := 
+    '
+    INSERT INTO 
+        SALES.SILVER.ERP_PX_CAT_G1V2
+    SELECT
+        *
+        EXCLUDE (VALUE, SRC_YEAR, SRC_MONTH, SRC_FILE),
+        GETDATE()
+    FROM 
+        SALES.BRONZE.ERP_PX_CAT_G1V2_EXT
+    WHERE
+        SRC_YEAR = ' || V_YEAR || ' AND
+        SRC_MONTH = ' || V_MONTH;
+        
+    EXECUTE IMMEDIATE SQL_CMD;
+
+    RETURN 'Successfully loaded SALES.SILVER.SP_LOAD_ERP_PX_CAT_G1V2';
+END;
+
+
+--------
+-- Load SILVER.ERP_CUST_AZ12 3 of 3 silver tables
+CREATE OR REPLACE PROCEDURE SILVER.SP_LOAD_ERP_CUST_AZ12_PARAM(V_YEAR INT, V_MONTH INT)
+RETURNS STRING
+LANGUAGE SQL
+AS
+BEGIN
+    LET SQL_CMD STRING := 
+    '
+    INSERT INTO 
+        SALES.SILVER.ERP_CUST_AZ12
+    SELECT
+        CID,
+        BDATE,
+        CASE
+            WHEN TRIM(UPPER(GEN)) IN (''F'', ''FEMALE'') THEN ''Female''
+            WHEN TRIM(UPPER(GEN)) IN (''M'', ''MALE'') THEN ''Male''
+            WHEN TRIM(UPPER(GEN)) = '''' THEN ''N/A''
+            ELSE IFNULL(GEN, ''N/A'')
+        END AS GEN,
+        GETDATE()
+    FROM
+        (
+            SELECT
+                *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY CID
+                    ORDER BY 
+                        BDATE DESC
+                ) AS ROWNUM
+            FROM
+                SALES.BRONZE.ERP_CUST_AZ12_EXT
+            WHERE
+                SRC_YEAR = ' || V_YEAR || ' AND
+                SRC_MONTH = ' || V_MONTH || '
+        )
+    WHERE
+        ROWNUM = 1
+    ';
+
+    EXECUTE IMMEDIATE SQL_CMD;
+    
+    RETURN 'Successfully loaded SALES.SILVER.ERP_CUST_AZ12';
+END;
