@@ -3,7 +3,7 @@
 Create Silver Layer Tables
 ============================================
 Script Purpose:
-    This script creates the silver layer tables for CRM, POS, and ERP data sources.
+    This script creates the silver layer tables for both CRM and ERP data sources.
 
 */
 USE DATABASE SALES;
